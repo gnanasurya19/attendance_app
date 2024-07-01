@@ -1,0 +1,96 @@
+name: attendance_app
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dropdown_textfield: ^1.1.0
+  fl_chart: ^0.68.0
+  flutter_svg: ^2.0.10+1
+  gap: ^3.0.1
+  intl: ^0.19.0
+  popover: ^0.3.0+1
+  syncfusion_flutter_charts: ^25.2.7
+  provider: ^6.1.2
+  geocoding: ^3.0.0
+  geolocator: ^12.0.0
+  cached_network_image: ^3.3.1
+  animations: ^2.0.11
+  dotted_border: ^2.1.0
+  file_picker: ^8.0.5
+  email_validator: ^3.0.0
+  shared_preferences: ^2.2.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
+
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/app-icon.png"
+  adaptive_icon_background: "assets/images/app-icon-background.png" # 1024px
+  adaptive_icon_foreground : "assets/images/app-icon-foreground.png" # icon in middle size 512px and with padding total 1024px 
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/images/web_icon.png" # any size
+    background_color: "#ffffff"
+    theme_color: "#2282e2"
+  windows:
+    generate: true
+    image_path: "assets/images/web_icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/images/app-icon.png"
+
+
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/splash-screen.png # 1152px
+  branding: assets/images/branding.png # 1152px
+  background_image: "assets/images/app-icon-background.png"
+
+
+  android_12:
+    image: assets/images/splash-screen.png
+    branding: assets/images/branding.png
+
+
+  web: false
+
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
+
+  fonts:
+    - family: Roboto-Regular
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Regular.ttf
+
+    - family: Roboto-Light
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Light.ttf
+
+    - family: Roboto-Bold
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Bold.ttf
+
+    - family: Roboto-Medium
+      fonts:
+        - asset: assets/fonts/Roboto/Roboto-Medium.ttf
+    
