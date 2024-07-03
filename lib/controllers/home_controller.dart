@@ -1,8 +1,11 @@
+import 'package:attendance_app/models/attendance_model.dart';
 import 'package:attendance_app/res/common_lib.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../screens/widget/clock_in_confirmation.dart';
 import '../screens/widget/whf_button.dart';
 
 class HomeController extends ChangeNotifier {
@@ -19,7 +22,7 @@ class HomeController extends ChangeNotifier {
   String get clockInTime =>
       clockIn == null ? '--:--' : DateFormat('hh:mm').format(clockIn!);
   String get clockOutTime =>
-      clockOut == null ? '--:--' : DateFormat('hh:mm').format(clockIn!);
+      clockOut == null ? '--:--' : DateFormat('hh:mm').format(clockOut!);
 
   int? get workingHrsInMin => (clockIn == null || clockOut == null)
       ? null
@@ -29,26 +32,27 @@ class HomeController extends ChangeNotifier {
       ? '--:--'
       : "${(workingHrsInMin! ~/ 60).toString().padLeft(2, '0')}: ${(workingHrsInMin! % 60).toString().padLeft(2, '0')}";
 
+  AttendanceModel attendance = AttendanceModel();
+
   HomeController() {
     getLocalData();
   }
 
   void getLocalData() async {
+    attendance = hiveBox.values.last;
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String? inTime = sp.getString('clockInTime');
-    String? outTime = sp.getString('clockOutTime');
+    String? inTime = attendance.clockInTime;
+    String? outTime = attendance.clockOutTime;
     currentLocation = sp.getString('clockInLocation');
 
     if (inTime != null) {
       clockIn = DateFormat('hh:mm').parse(inTime);
-      print(clockIn);
     }
     if (outTime != null) {
       clockOut = DateFormat('hh:mm').parse(outTime);
       isAttCompleted = true;
     }
 
-    // sp.clear();
     notifyListeners();
   }
 
@@ -60,6 +64,15 @@ class HomeController extends ChangeNotifier {
           changToWHF(context);
         } else {
           clockIn = DateTime.now();
+          attendance = AttendanceModel(
+            attendanceType: 1,
+            clockInTime: clockInTime,
+            date: DateFormat('dd EEE MMM yyyy').format(
+              DateTime.now(),
+            ),
+          );
+          hiveBox.add(attendance);
+
           sp.setString('clockInTime', clockInTime);
           if (currentLocation != null) {
             sp.setString('clockInLocation', currentLocation!);
@@ -68,12 +81,18 @@ class HomeController extends ChangeNotifier {
         notifyListeners();
       });
     } else if (clockOut == null && clockIn != null) {
-      showConfirmation(context, 'are you sure want to clock out?', () {
-        clockOut = DateTime.now();
-        sp.setString('clockOutTime', clockOutTime);
-        isAttCompleted = true;
-        notifyListeners();
-      });
+      showConfirmation(
+        context,
+        'are you sure want to clock out?',
+        () {
+          clockOut = DateTime.now();
+          attendance.clockOutTime = clockOutTime;
+          hiveBox.putAt(hiveBox.length - 1, attendance);
+          sp.setString('clockOutTime', clockOutTime);
+          isAttCompleted = true;
+          notifyListeners();
+        },
+      );
     }
   }
 
@@ -120,59 +139,6 @@ class HomeController extends ChangeNotifier {
           currentLocation = 'Work From Home';
           notifyListeners();
         },
-      ),
-    );
-  }
-}
-
-class ClockInConfirmation extends StatelessWidget {
-  const ClockInConfirmation({
-    super.key,
-    required this.onClick,
-    required this.text,
-  });
-
-  final String text;
-  final Function() onClick;
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      backgroundColor: AppColors.white,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(padding: EdgeInsets.all(style.insets.md), child: Text(text)),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                  style: const ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(AppColors.black)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text(
-                    'No',
-                    style: style.text.title,
-                  )),
-              TextButton(
-                  style: const ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(AppColors.blue)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    onClick();
-                  },
-                  child: Text(
-                    'Yes',
-                    style: style.text.title,
-                  ))
-            ],
-          )
-        ],
       ),
     );
   }

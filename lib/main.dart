@@ -1,3 +1,4 @@
+import 'package:attendance_app/models/attendance_model.dart';
 import 'package:attendance_app/res/common_lib.dart';
 
 import 'package:attendance_app/controllers/attendance_controller.dart';
@@ -6,14 +7,21 @@ import 'package:attendance_app/controllers/leave_controller.dart';
 import 'package:attendance_app/controllers/todo_controller.dart';
 
 import 'package:attendance_app/screens/apply_leave_page.dart';
+import 'package:attendance_app/screens/dymmy.dart';
 import 'package:attendance_app/screens/login_page.dart';
 import 'package:attendance_app/screens/profile_page.dart';
 import 'package:attendance_app/screens/signup_page.dart';
 import 'package:attendance_app/screens/tab_bar.dart';
 import 'package:attendance_app/screens/team_reports_page.dart';
 import 'package:attendance_app/screens/todo_shedules_page.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Hive.initFlutter();
+  Hive.registerAdapter(AttendanceModelAdapter());
+  hiveBox = await Hive.openBox('attendance');
   runApp(const MainApp());
 }
 
@@ -73,6 +81,9 @@ class MainApp extends StatelessWidget {
               case 'apply-leave':
                 widget = const ApplyLeavePage();
                 break;
+              case 'dummy':
+                widget = const Dummy();
+                break;
               default:
                 widget = const Scaffold(
                   body: Center(
@@ -84,7 +95,7 @@ class MainApp extends StatelessWidget {
               builder: (context) => widget,
             );
           },
-          initialRoute: 'tabs',
+          initialRoute: 'dummy',
         ),
       ),
     );

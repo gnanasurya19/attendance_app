@@ -5,14 +5,16 @@ import 'package:geolocator/geolocator.dart';
 
 class UtilService {
   showSnackBar(context, text) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(
-        text,
-        style: style.text.bodyContentSmall.copyWith(color: AppColors.white),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          text,
+          style: style.text.bodyContentSmall.copyWith(color: AppColors.white),
+        ),
+        backgroundColor: AppColors.red,
+        showCloseIcon: true,
       ),
-      backgroundColor: AppColors.red,
-      showCloseIcon: true,
-    ));
+    );
   }
 
   CoordinatesModel coordinates = CoordinatesModel();

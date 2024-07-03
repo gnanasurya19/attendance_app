@@ -15,6 +15,14 @@ class AttendanceController extends ChangeNotifier {
 
   int selectedCalYear = DateTime.now().year;
 
+  AttendanceController() {
+    getLocalData();
+  }
+
+  getLocalData() {
+    print(hiveBox.values.toList());
+  }
+
   final List<AttendanceModel> attendanceList = [
     AttendanceModel(
       attendanceType: 1,

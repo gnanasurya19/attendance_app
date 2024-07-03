@@ -65,6 +65,7 @@ class TimeContainerWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     HomeController homeController = Provider.of<HomeController>(context);
+    homeController.workingHrsInMin;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
