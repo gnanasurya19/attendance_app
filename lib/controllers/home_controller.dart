@@ -1,7 +1,6 @@
 import 'package:attendance_app/models/attendance_model.dart';
 import 'package:attendance_app/res/common_lib.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -39,20 +38,39 @@ class HomeController extends ChangeNotifier {
   }
 
   void getLocalData() async {
-    attendance = hiveBox.values.last;
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? inTime = attendance.clockInTime;
-    String? outTime = attendance.clockOutTime;
-    currentLocation = sp.getString('clockInLocation');
+    // DateTime now = DateTime.now();
+    // await hiveBox.clear();
+    // for (var i = 0; i < 365 * 3; i++) {
+    //   hiveBox.add(
+    //     AttendanceModel(
+    //       clockInTime: now.subtract(
+    //         Duration(days: i, hours: 3, minutes: 30),
+    //       ),
+    //       clockOutTime: now.subtract(
+    //         Duration(days: i, hours: 6, minutes: 20),
+    //       ),
+    //       date: now.subtract(
+    //         Duration(days: i),
+    //       ),
+    //       workingHrsInMin: 400,
+    //     ),
+    //   );
+    // }
 
-    if (inTime != null) {
-      clockIn = DateFormat('hh:mm').parse(inTime);
+    if (hiveBox.isNotEmpty) {
+      attendance = hiveBox.values.last;
+      SharedPreferences sp = await SharedPreferences.getInstance();
+      String today = sp.getString('today') ?? '';
+      bool isToday = DateFormat('dd MM yyyy').format(DateTime.now()) == today;
+      if (isToday) {
+        clockIn = attendance.clockInTime;
+        clockOut = attendance.clockOutTime;
+        currentLocation = sp.getString('clockInLocation');
+        if (clockOut != null) {
+          isAttCompleted = true;
+        }
+      }
     }
-    if (outTime != null) {
-      clockOut = DateFormat('hh:mm').parse(outTime);
-      isAttCompleted = true;
-    }
-
     notifyListeners();
   }
 
@@ -63,20 +81,7 @@ class HomeController extends ChangeNotifier {
         if (currentLocation == 'You are not in Office reach') {
           changToWHF(context);
         } else {
-          clockIn = DateTime.now();
-          attendance = AttendanceModel(
-            attendanceType: 1,
-            clockInTime: clockInTime,
-            date: DateFormat('dd EEE MMM yyyy').format(
-              DateTime.now(),
-            ),
-          );
-          hiveBox.add(attendance);
-
-          sp.setString('clockInTime', clockInTime);
-          if (currentLocation != null) {
-            sp.setString('clockInLocation', currentLocation!);
-          }
+          doClockIn(sp);
         }
         notifyListeners();
       });
@@ -85,14 +90,34 @@ class HomeController extends ChangeNotifier {
         context,
         'are you sure want to clock out?',
         () {
-          clockOut = DateTime.now();
-          attendance.clockOutTime = clockOutTime;
-          hiveBox.putAt(hiveBox.length - 1, attendance);
-          sp.setString('clockOutTime', clockOutTime);
-          isAttCompleted = true;
-          notifyListeners();
+          doClockOut(sp);
         },
       );
+    }
+  }
+
+  void doClockOut(SharedPreferences sp) {
+    clockOut = DateTime.now();
+    attendance.attendanceType = isWfh ? 0 : 1;
+    attendance.clockOutTime = clockOut;
+    attendance.workingHrsInMin = workingHrsInMin;
+    hiveBox.putAt(hiveBox.length - 1, attendance);
+    sp.setString('clockOutTime', clockOutTime);
+    isAttCompleted = true;
+    notifyListeners();
+  }
+
+  void doClockIn(SharedPreferences sp) {
+    clockIn = DateTime.now();
+    attendance = AttendanceModel(
+      clockInTime: DateTime.now(),
+      date: DateTime.now(),
+    );
+    hiveBox.add(attendance);
+    sp.setString('clockInTime', clockInTime);
+    sp.setString('today', DateFormat('dd MM yyyy').format(clockIn!));
+    if (currentLocation != null) {
+      sp.setString('clockInLocation', currentLocation!);
     }
   }
 

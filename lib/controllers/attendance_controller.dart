@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 
 class AttendanceController extends ChangeNotifier {
   int month = DateTime.now().month;
-  String get selectedMonth => DateFormat('MMMM').format(DateTime(2023, month));
+  String get selectedMonth => DateFormat('MMMM').format(DateTime(2024, month));
   int selectedYear = DateTime.now().year;
 
   //calendar
@@ -16,161 +16,23 @@ class AttendanceController extends ChangeNotifier {
   int selectedCalYear = DateTime.now().year;
 
   AttendanceController() {
-    getLocalData();
+    getMonthlyData();
   }
 
-  getLocalData() {
-    print(hiveBox.values.toList());
+  getMonthlyData() {
+    final firstDateofMonth = DateTime(selectedYear, month, 1);
+    final lastDateofMonth = DateTime(selectedYear, month + 1, 1);
+    if (hiveBox.isNotEmpty) {
+      attendanceList = hiveBox.values
+          .where((element) =>
+              element.date!.isAfter(firstDateofMonth) &&
+              element.date!.isBefore(lastDateofMonth))
+          .toList();
+    }
+    notifyListeners();
   }
 
-  final List<AttendanceModel> attendanceList = [
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '10:00am',
-      clockOutTime: '06:30',
-      date: '11Thu',
-      workingHrsIn: '07h 30m',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '05:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-      isClockOutlate: true,
-      isworkHrsLess: true,
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockOutTime: '06:20',
-      date: '12Fri',
-    ),
-    AttendanceModel(
-      attendanceType: 0,
-      clockOutTime: '06:20',
-      date: '12Fri',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '06:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-      isworkHrsLess: true,
-      isClockOutlate: true,
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      date: '12Fri',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '06:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-      isClockInlate: true,
-      isworkHrsLess: true,
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '06:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '06:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-    ),
-    AttendanceModel(
-      attendanceType: 1,
-      clockInTime: '09:10am',
-      clockOutTime: '06:20',
-      date: '12Fri',
-      workingHrsIn: '06h 10m',
-    ),
-  ];
-
-  final List<AttendanceModel> attendanceList1 = [
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '06:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '05:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m',
-        isClockOutlate: true,
-        isworkHrsLess: true),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '10:00am',
-        clockOutTime: '06:30',
-        date: '11Thu',
-        workingHrsIn: '07h 30m'),
-    AttendanceModel(attendanceType: 1, clockOutTime: '06:20', date: '12Fri'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        date: '12Fri',
-        workingHrsIn: '06h 10m'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '06:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m',
-        isClockInlate: true,
-        isworkHrsLess: true),
-    AttendanceModel(attendanceType: 0, clockOutTime: '06:20', date: '12Fri'),
-    AttendanceModel(attendanceType: 1, clockInTime: '09:10am', date: '12Fri'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '06:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        date: '12Fri',
-        workingHrsIn: '06h 10m'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '06:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m'),
-    AttendanceModel(
-        attendanceType: 1,
-        clockInTime: '09:10am',
-        clockOutTime: '06:20',
-        date: '12Fri',
-        workingHrsIn: '06h 10m',
-        isworkHrsLess: true,
-        isClockOutlate: true),
-  ];
+  List<AttendanceModel> attendanceList = [];
 
   bool isAnimate = false;
 
@@ -192,29 +54,43 @@ class AttendanceController extends ChangeNotifier {
   changeCalMonthandYear() {
     month = calMonth;
     selectedYear = selectedCalYear;
-    notifyListeners();
+    getMonthlyData();
   }
 
   increaseMonth() {
-    if (month == 11) {
-      month = 0;
+    if (month == 12) {
+      month = 1;
       selectedYear++;
     } else {
       month++;
     }
     isAnimate = !isAnimate;
-    notifyListeners();
+    getMonthlyData();
   }
 
   decreaseMonth() {
-    if (month == 0) {
-      month = 11;
+    if (month == 1) {
+      month = 12;
       selectedYear--;
     } else {
       month--;
     }
 
     isAnimate = !isAnimate;
+    getMonthlyData();
+  }
+
+  resetCalendar() {
+    selectedYear = DateTime.now().year;
+    month = DateTime.now().month;
+    calMonth = month;
+    selectedCalYear = selectedYear;
+    getMonthlyData();
+  }
+
+  cancelCalendar() {
+    selectedCalYear = selectedYear;
+    calMonth = month;
     notifyListeners();
   }
 }

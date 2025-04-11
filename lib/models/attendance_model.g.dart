@@ -8,7 +8,7 @@ part of 'attendance_model.dart';
 
 class AttendanceModelAdapter extends TypeAdapter<AttendanceModel> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
   AttendanceModel read(BinaryReader reader) {
@@ -17,10 +17,10 @@ class AttendanceModelAdapter extends TypeAdapter<AttendanceModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AttendanceModel(
-      date: fields[0] as String?,
-      clockInTime: fields[1] as String?,
-      clockOutTime: fields[2] as String?,
-      workingHrsIn: fields[3] as String?,
+      date: fields[0] as DateTime?,
+      clockInTime: fields[1] as DateTime?,
+      clockOutTime: fields[2] as DateTime?,
+      workingHrsInMin: fields[3] as int?,
       attendanceType: fields[4] as int?,
       isClockInlate: fields[5] as bool?,
       isClockOutlate: fields[6] as bool?,
@@ -39,7 +39,7 @@ class AttendanceModelAdapter extends TypeAdapter<AttendanceModel> {
       ..writeByte(2)
       ..write(obj.clockOutTime)
       ..writeByte(3)
-      ..write(obj.workingHrsIn)
+      ..write(obj.workingHrsInMin)
       ..writeByte(4)
       ..write(obj.attendanceType)
       ..writeByte(5)

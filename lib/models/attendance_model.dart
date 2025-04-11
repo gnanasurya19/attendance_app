@@ -1,16 +1,16 @@
 import 'package:hive/hive.dart';
 part 'attendance_model.g.dart';
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 class AttendanceModel {
   @HiveField(0)
-  String? date;
+  DateTime? date;
   @HiveField(1)
-  String? clockInTime;
+  DateTime? clockInTime;
   @HiveField(2)
-  String? clockOutTime;
+  DateTime? clockOutTime;
   @HiveField(3)
-  String? workingHrsIn;
+  int? workingHrsInMin;
   @HiveField(4)
   int? attendanceType;
   @HiveField(5)
@@ -23,10 +23,22 @@ class AttendanceModel {
     this.date,
     this.clockInTime,
     this.clockOutTime,
-    this.workingHrsIn,
+    this.workingHrsInMin,
     this.attendanceType,
     this.isClockInlate,
     this.isClockOutlate,
-    this.isworkHrsLess = true,
+    this.isworkHrsLess = false,
   });
+
+  @override
+  String toString() {
+    return '''date:$date 
+clockInTime:$clockInTime
+clockOutTime:$clockOutTime
+workingHrsInMin:$workingHrsInMin
+attendanceType:$attendanceType
+isClockInlate:$isClockInlate
+isClockOutlate:$isClockOutlate
+isworkHrsLess:$isworkHrsLess''';
+  }
 }

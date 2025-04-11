@@ -108,12 +108,23 @@ class _YearMonthPickerState extends State<YearMonthPicker> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextButton(
-                  style: const ButtonStyle(
-                      foregroundColor: WidgetStatePropertyAll(AppColors.blue)),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Cancel')),
+                style: const ButtonStyle(
+                    foregroundColor: WidgetStatePropertyAll(AppColors.black)),
+                onPressed: () {
+                  context.read<AttendanceController>().resetCalendar();
+                  Navigator.pop(context);
+                },
+                child: const Text('Reset'),
+              ),
+              TextButton(
+                style: const ButtonStyle(
+                    foregroundColor: WidgetStatePropertyAll(AppColors.blue)),
+                onPressed: () {
+                  context.read<AttendanceController>().cancelCalendar();
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
               const Gap(15),
               ElevatedButton(
                   style: const ButtonStyle(

@@ -11,7 +11,8 @@ class ProfilePopover extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OpenContainer(
-      tappable:false,
+      tappable: false,
+      transitionDuration: Durations.medium1,
       closedBuilder: (BuildContext context, action) {
         return Container(
           padding: EdgeInsets.all(style.insets.lg),

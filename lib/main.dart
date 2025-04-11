@@ -1,13 +1,11 @@
 import 'package:attendance_app/models/attendance_model.dart';
 import 'package:attendance_app/res/common_lib.dart';
-
 import 'package:attendance_app/controllers/attendance_controller.dart';
 import 'package:attendance_app/controllers/home_controller.dart';
 import 'package:attendance_app/controllers/leave_controller.dart';
 import 'package:attendance_app/controllers/todo_controller.dart';
-
 import 'package:attendance_app/screens/apply_leave_page.dart';
-import 'package:attendance_app/screens/dymmy.dart';
+import 'package:attendance_app/screens/dummy.dart';
 import 'package:attendance_app/screens/login_page.dart';
 import 'package:attendance_app/screens/profile_page.dart';
 import 'package:attendance_app/screens/signup_page.dart';
@@ -95,7 +93,7 @@ class MainApp extends StatelessWidget {
               builder: (context) => widget,
             );
           },
-          initialRoute: 'dummy',
+          initialRoute: 'tabs',
         ),
       ),
     );

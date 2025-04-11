@@ -2,6 +2,8 @@ import 'package:animations/animations.dart';
 import 'package:attendance_app/controllers/attendance_controller.dart';
 import 'package:attendance_app/models/attendance_model.dart';
 import 'package:attendance_app/res/common_lib.dart';
+import 'package:intl/intl.dart';
+import 'package:lottie/lottie.dart';
 
 import 'widget/edit_time_dialog.dart';
 import 'widget/month_picker.dart';
@@ -20,20 +22,11 @@ class _AttendancePageState extends State<AttendancePage>
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) =>
+        Provider.of<AttendanceController>(context, listen: false)
+            .getMonthlyData());
     super.initState();
-    // populateList();
   }
-
-  // void populateList() {
-  //   Future.delayed(const Duration(milliseconds: 500), () {
-  //     for (int i = 0; i < attendanceList.length; i++) {
-  //       Future.delayed(Duration(milliseconds: i * 100), () {
-  //         animationList.add(attendanceList[i]);
-  //         listKey.currentState?.insertItem(animationList.length - 1);
-  //       });
-  //     }
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -149,11 +142,11 @@ class _AttendancePageState extends State<AttendancePage>
                   }
                 },
               );
+
               var listVie2 = ListView.builder(
-                itemCount: attController.attendanceList1.length,
+                itemCount: attController.attendanceList.length,
                 itemBuilder: (context, index) {
-                  if (attController.attendanceList1[index].attendanceType ==
-                      0) {
+                  if (attController.attendanceList[index].attendanceType == 0) {
                     return Container(
                       margin: EdgeInsets.all(style.insets.md),
                       padding: const EdgeInsets.symmetric(vertical: 20),
@@ -166,13 +159,18 @@ class _AttendancePageState extends State<AttendancePage>
                     );
                   } else {
                     return AttendanceDetail(
-                      attendance: attController.attendanceList1[index],
+                      attendance: attController.attendanceList[index],
                     );
                   }
                 },
               );
+
               return PageTransitionSwitcher(
-                child: attController.isAnimate ? listView : listVie2,
+                child: attController.attendanceList.isEmpty
+                    ? const EmptyAttendance()
+                    : attController.isAnimate
+                        ? listView
+                        : listVie2,
                 transitionBuilder:
                     (child, primaryAnimation, secondaryAnimation) =>
                         FadeThroughTransition(
@@ -184,6 +182,35 @@ class _AttendancePageState extends State<AttendancePage>
               );
             }),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class EmptyAttendance extends StatelessWidget {
+  const EmptyAttendance({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Lottie.asset(
+            'assets/lottie/empty.json',
+            width: 200,
+            height: 200,
+            repeat: false,
+          ),
+          Text(
+            'No data found',
+            style: style.text.h3.copyWith(
+              color: AppColors.grey,
+            ),
+          )
         ],
       ),
     );
@@ -203,24 +230,7 @@ class AttendanceDetail extends StatelessWidget {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        showGeneralDialog(
-            context: context,
-            pageBuilder: (BuildContext context, animation, secondaryAnimation) {
-              final Animation<Offset> offsetAnimation =
-                  Tween(begin: const Offset(0, 1), end: const Offset(0, 0))
-                      .animate(animation);
-              return SlideTransition(
-                position: offsetAnimation,
-                child: EditTimeDialog(
-                  onClick: () {
-                    Navigator.pop(context);
-                    showDialog(
-                        context: context,
-                        builder: (context) => const RequestSentDialog());
-                  },
-                ),
-              );
-            });
+        openEditTime(context);
       },
       child: Column(
         children: [
@@ -231,29 +241,47 @@ class AttendanceDetail extends StatelessWidget {
                 Expanded(
                   child: Align(
                     child: LayoutBuilder(builder: (context, constraints) {
-                      return Container(
-                        width: constraints.maxWidth * 0.6,
-                        height: constraints.maxWidth * 0.6,
+                      return Stack(
                         alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.white,
-                          border: Border.all(
-                            color: AppColors.shadow,
+                        children: [
+                          Container(
+                            width: constraints.maxWidth * 0.6,
+                            height: constraints.maxWidth * 0.6,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              border: Border.all(
+                                color: AppColors.shadow,
+                              ),
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  DateFormat('dd').format(attendance.date!),
+                                  style: style.text.h3,
+                                ),
+                                Text(
+                                  DateFormat('EEE').format(attendance.date!),
+                                  style: style.text.h5,
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              attendance.date!.substring(0, 2),
-                              style: style.text.h3,
+                          if (attendance.attendanceType == 0)
+                            Positioned(
+                              top: -4,
+                              right: -4,
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                color: AppColors.white,
+                                child: const SvgIcon(
+                                  name: 'home-fill',
+                                  size: 10,
+                                ),
+                              ),
                             ),
-                            Text(
-                              attendance.date!.substring(2),
-                              style: style.text.h5,
-                            ),
-                          ],
-                        ),
+                        ],
                       );
                     }),
                   ),
@@ -278,13 +306,21 @@ class AttendanceDetail extends StatelessWidget {
                         ),
                         const Gap(2)
                       ],
-                      Text(attendance.clockInTime ?? '--:--',
+                      if (attendance.clockInTime != null)
+                        Text(
+                          DateFormat('hh:mm').format(attendance.clockInTime!),
                           style: style.text.titleMd.copyWith(
                               color: attendance.clockInTime == null
                                   ? AppColors.black
                                   : attendance.isClockInlate ?? false
                                       ? AppColors.red
-                                      : AppColors.green)),
+                                      : AppColors.green),
+                        )
+                      else
+                        Text(
+                          '--:--',
+                          style: style.text.titleMd,
+                        ),
                     ],
                   ),
                 ),
@@ -305,26 +341,34 @@ class AttendanceDetail extends StatelessWidget {
                         ),
                         const Gap(2)
                       ],
-                      Text(
-                        attendance.clockOutTime ?? '--:--',
-                        textAlign: TextAlign.center,
-                        style: style.text.titleMd.copyWith(
-                          color: attendance.clockOutTime == null
-                              ? AppColors.black
-                              : attendance.isClockOutlate ?? false
-                                  ? AppColors.red
-                                  : AppColors.green,
-                        ),
-                      )
+                      if (attendance.clockOutTime != null)
+                        Text(
+                          DateFormat('hh:mm').format(attendance.clockOutTime!),
+                          textAlign: TextAlign.center,
+                          style: style.text.titleMd.copyWith(
+                            color: attendance.clockOutTime == null
+                                ? AppColors.black
+                                : attendance.isClockOutlate ?? false
+                                    ? AppColors.red
+                                    : AppColors.green,
+                          ),
+                        )
+                      else
+                        Text(
+                          '--:--',
+                          style: style.text.titleMd,
+                        )
                     ],
                   ),
                 ),
                 Expanded(
                   child: Text(
-                    attendance.workingHrsIn ?? "--:--",
+                    attendance.workingHrsInMin == null
+                        ? "--:--"
+                        : "${attendance.workingHrsInMin! ~/ 60}h:${(attendance.workingHrsInMin! % 60)}m",
                     textAlign: TextAlign.center,
                     style: style.text.titleMd.copyWith(
-                      color: attendance.workingHrsIn == null
+                      color: attendance.workingHrsInMin == null
                           ? AppColors.black
                           : attendance.isworkHrsLess ?? false
                               ? AppColors.red
@@ -338,5 +382,26 @@ class AttendanceDetail extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future openEditTime(BuildContext context) {
+    return showGeneralDialog(
+        context: context,
+        pageBuilder: (BuildContext context, animation, secondaryAnimation) {
+          final Animation<Offset> offsetAnimation =
+              Tween(begin: const Offset(0, 1), end: const Offset(0, 0))
+                  .animate(animation);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: EditTimeDialog(
+              onClick: () {
+                Navigator.pop(context);
+                showDialog(
+                    context: context,
+                    builder: (context) => const RequestSentDialog());
+              },
+            ),
+          );
+        });
   }
 }
